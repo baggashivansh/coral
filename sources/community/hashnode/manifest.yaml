@@ -1,0 +1,53 @@
+name: hashnode
+version: 0.1.0
+dsl_version: 3
+backend: http
+
+description: Hashnode articles and developer blog discovery via the public GraphQL API.
+
+base_url: https://gql.hashnode.com
+
+test_queries:
+  - SELECT * FROM hashnode.posts LIMIT 1
+
+tables:
+  - name: posts
+    description: |
+      Fetch Hashnode blog posts, metadata, and publication details.
+
+    fetch_limit_default: 20
+
+    request:
+      method: POST
+      path: /
+
+    response: {}
+
+    pagination:
+      mode: none
+
+    columns:
+      - name: title
+        type: Utf8
+        nullable: true
+        description: Title of the Hashnode post.
+
+      - name: slug
+        type: Utf8
+        nullable: true
+        description: Unique slug for the post.
+
+      - name: brief
+        type: Utf8
+        nullable: true
+        description: Short summary of the article.
+
+      - name: author
+        type: Utf8
+        nullable: true
+        description: Author of the post.
+
+      - name: publication
+        type: Utf8
+        nullable: true
+        description: Publication or blog name.
