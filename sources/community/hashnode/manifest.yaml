@@ -20,6 +20,12 @@ tables:
     request:
       method: POST
       path: /
+      headers:
+        Content-Type: application/json
+      body: |
+        {
+          "query": "query { posts(first: 20) { edges { node { title slug brief publishedAt author { name } publication { title } } } } }"
+        }
 
     response: {}
 
