@@ -13,7 +13,7 @@ auth:
   token_env: HASHNODE_API_TOKEN
 
 test_queries:
-  - SELECT title, author_name FROM hashnode.publication_posts LIMIT 1
+  - SELECT title, author_name FROM hashnode.publication_posts WHERE host = 'blog.hashnode.com' LIMIT 1
 
 tables:
   - name: publication_posts
