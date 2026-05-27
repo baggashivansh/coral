@@ -29,7 +29,7 @@ export HASHNODE_API_TOKEN=your_token_here
 Add the source:
 
 ```bash
-coral source add hashnode
+coral source add --file sources/community/hashnode/manifest.yaml
 ```
 
 ---
@@ -49,6 +49,7 @@ Fetch recent publication posts:
 ```sql
 SELECT title, author_name, published_at
 FROM hashnode.publication_posts
+WHERE host = 'blog.hashnode.com'
 LIMIT 5;
 ```
 
@@ -57,6 +58,7 @@ Fetch post URLs and summaries:
 ```sql
 SELECT title, brief, url
 FROM hashnode.publication_posts
+WHERE host = 'blog.hashnode.com'
 LIMIT 10;
 ```
 
@@ -65,6 +67,7 @@ Fetch publication information:
 ```sql
 SELECT title, publication_title
 FROM hashnode.publication_posts
+WHERE host = 'blog.hashnode.com'
 LIMIT 5;
 ```
 
