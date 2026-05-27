@@ -3,57 +3,143 @@ version: 0.1.0
 dsl_version: 3
 backend: http
 
-description: Hashnode articles and developer blog discovery via the public GraphQL API.
+description: >
+  Query Hashnode publication posts using the official Hashnode GraphQL API.
 
 base_url: https://gql.hashnode.com
 
+auth:
+  type: bearer
+  token_env: HASHNODE_API_TOKEN
+
 test_queries:
-  - SELECT * FROM hashnode.posts LIMIT 1
+  - SELECT title, author_name FROM hashnode.publication_posts LIMIT 1
 
 tables:
-  - name: posts
+  - name: publication_posts
+
     description: |
-      Fetch Hashnode blog posts, metadata, and publication details.
+      Fetch posts from a Hashnode publication using the official GraphQL API.
 
     fetch_limit_default: 20
 
     request:
       method: POST
       path: /
-      headers:
-        Content-Type: application/json
-      body: |
-        {
-          "query": "query { posts(first: 20) { edges { node { title slug brief publishedAt author { name } publication { title } } } } }"
-        }
 
-    response: {}
+      headers:
+        - name: Content-Type
+          value: application/json
+
+      body:
+        query: |
+          query PublicationPosts($host: String!, $first: Int!, $after: String) {
+            publication(host: $host) {
+              posts(first: $first, after: $after) {
+                edges {
+                  node {
+                    title
+                    slug
+                    brief
+                    publishedAt
+                    url
+
+                    author {
+                      name
+                      username
+                    }
+
+                    publication {
+                      title
+                    }
+                  }
+                }
+
+                pageInfo {
+                  hasNextPage
+                  endCursor
+                }
+              }
+            }
+          }
+
+        variables:
+          host: "{{ host }}"
+          first: "{{ limit }}"
+          after: "{{ cursor }}"
+
+    response:
+      rows_path: data.publication.posts.edges
 
     pagination:
-      mode: none
+      mode: cursor
+      cursor_path: data.publication.posts.pageInfo.endCursor
+      has_more_path: data.publication.posts.pageInfo.hasNextPage
 
     columns:
       - name: title
+        path: node.title
         type: Utf8
         nullable: true
         description: Title of the Hashnode post.
 
       - name: slug
+        path: node.slug
         type: Utf8
         nullable: true
         description: Unique slug for the post.
 
       - name: brief
+        path: node.brief
         type: Utf8
         nullable: true
         description: Short summary of the article.
 
-      - name: author
+      - name: published_at
+        path: node.publishedAt
         type: Utf8
         nullable: true
-        description: Author of the post.
+        description: Publication date of the post.
 
-      - name: publication
+      - name: url
+        path: node.url
+        type: Utf8
+        nullable: true
+        description: Direct URL of the post.
+
+      - name: author_name
+        path: node.author.name
+        type: Utf8
+        nullable: true
+        description: Author name.
+
+      - name: author_username
+        path: node.author.username
+        type: Utf8
+        nullable: true
+        description: Author username.
+
+      - name: publication_title
+        path: node.publication.title
         type: Utf8
         nullable: true
         description: Publication or blog name.
+
+    parameters:
+      - name: host
+        type: Utf8
+        required: true
+        description: >
+          Hashnode publication hostname.
+          Example: blog.hashnode.com
+
+      - name: limit
+        type: Int64
+        required: false
+        default: 20
+        description: Number of posts to fetch.
+
+      - name: cursor
+        type: Utf8
+        required: false
+        description: Cursor used for pagination.
